@@ -1,4 +1,4 @@
-const Koa=require('koa');
+﻿const Koa=require('koa');
 const path=require('path')
 const bodyParser = require('koa-bodyparser');
 const ejs=require('ejs');
@@ -9,8 +9,19 @@ const router=require('koa-router')
 const views = require('koa-views')
 const staticCache = require('koa-static-cache')
 const cors = require('koa2-cors');
+// 引入https 以及 koa-ssl
+const fs = require('fs');
+const https = require('https')
+const sslify = require('koa-sslify').default
 const app = new Koa()
 
+
+// 路径为证书放置的位置
+const options = {
+    key: fs.readFileSync('./3_www.hgqweb.cn.key'),
+    cert: fs.readFileSync('./2_www.hgqweb.cn.crt'),
+}
+app.use(sslify())  // 使用ssl
 
 // session存储配置
 const sessionMysqlConfig= {
@@ -48,7 +59,8 @@ app.use(cors({
         if (ctx.url === '/test') {
             return "*"; // 允许来自所有域名请求
         }
-        return 'http://localhost:8080'; 
+        // return 'http://localhost:8080'; 
+	return "*"
     },
     exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
     maxAge: 5,
@@ -64,6 +76,12 @@ app.use(require('./routers/page.js').routes())
 app.use(require('./routers/login.js').routes())
 
 
-app.listen(config.port)
+// app.listen(config.port)
 
-console.log(`listening on port ${config.port}`)
+https.createServer(options, app.callback()).listen(config.port, (err) => {
+    if (err) {
+        console.log('服务启动出错', err);
+    } else {
+        console.log(`listening on port ${config.port} 端口`);
+    }	
+});
