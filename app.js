@@ -1,27 +1,27 @@
 ﻿const Koa=require('koa');
-const path=require('path')
+const path=require('path');
 const bodyParser = require('koa-bodyparser');
 const ejs=require('ejs');
 const session = require('koa-session-minimal');
 const MysqlStore = require('koa-mysql-session');
 const config = require('./config/default.js');
-const router=require('koa-router')
-const views = require('koa-views')
-const staticCache = require('koa-static-cache')
+const router=require('koa-router');
+const views = require('koa-views');
+const staticCache = require('koa-static-cache');
 const cors = require('koa2-cors');
 // 引入https 以及 koa-ssl
 const fs = require('fs');
-const https = require('https')
+const https = require('https');
 const sslify = require('koa-sslify').default
-const app = new Koa()
+const app = new Koa();
 
 
 // 路径为证书放置的位置
-const options = {
-    key: fs.readFileSync('./3_www.hgqweb.cn.key'),
-    cert: fs.readFileSync('./2_www.hgqweb.cn.crt'),
-}
-app.use(sslify())  // 使用ssl
+// const options = {
+//     key: fs.readFileSync('./3_www.hgqweb.cn.key'),
+//     cert: fs.readFileSync('./2_www.hgqweb.cn.crt'),
+// }
+// app.use(sslify())  // 使用ssl
 
 // session存储配置
 const sessionMysqlConfig= {
@@ -60,7 +60,7 @@ app.use(cors({
             return "*"; // 允许来自所有域名请求
         }
         // return 'http://localhost:8080'; 
-	return "*"
+	    return "*"
     },
     exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
     maxAge: 5,
@@ -76,12 +76,14 @@ app.use(require('./routers/page.js').routes())
 app.use(require('./routers/login.js').routes())
 
 
-// app.listen(config.port)
+app.listen(2324, function () {
+    console.log(`listening on port ${config.port} 端口`);
+})
 
-https.createServer(options, app.callback()).listen(config.port, (err) => {
-    if (err) {
-        console.log('服务启动出错', err);
-    } else {
-        console.log(`listening on port ${config.port} 端口`);
-    }	
-});
+// https.createServer(options, app.callback()).listen(config.port, (err) => {
+//     if (err) {
+//         console.log('服务启动出错', err);
+//     } else {
+//         console.log(`listening on port ${config.port} 端口`);
+//     }	
+// });

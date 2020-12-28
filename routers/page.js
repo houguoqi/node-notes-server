@@ -1,7 +1,7 @@
 const router = require('koa-router')();
 const controller = require('../controller/c-page')
 
-router.get('/', (ctx) => {
+router.get('/', async (ctx) => {
     ctx.body = {
         code: 200,
         message: 'welcome'
