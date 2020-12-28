@@ -10,5 +10,6 @@ router.get('/', async (ctx) => {
 router.get('/add_blog', controller.addBlog)
 router.get('/get_all_blogs', controller.selectAllBlog)
 router.get('/get_my_blogs', controller.selectMyBlog)
+router.get('/get_userinfo_id', controller.selectUserInfoById)
 
 module.exports = router

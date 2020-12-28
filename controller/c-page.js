@@ -104,3 +104,28 @@ exports.selectMyBlog = async ctx => {
         }
     })
 }
+
+// 通过用户ID查询用户信息
+exports.selectUserInfoById = async ctx => {
+    let user_id = ctx.query.user_id
+    if (!user_id) {
+        ctx.body = {
+            code: 500,
+            message: '查询异常，请重试'
+        }
+        return
+    }
+    await userModel.selectUserById(user_id).then(res => {
+        ctx.body = {
+            code: 200,
+            message: '查询成功',
+            result: res
+        }
+    }).catch(err => {
+        console.log(err)
+        ctx.body = {
+            code: 500,
+            message: '查询异常，请重试'
+        }
+    })
+}
