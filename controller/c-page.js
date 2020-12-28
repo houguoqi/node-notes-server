@@ -7,14 +7,16 @@ exports.addBlog = async ctx => {
     await check.checkToken(ctx)
     let blog_id = null
     let createdate = moment().format('YYYY-MM-DD HH:mm:ss')
-    let { blog_title, blog_content, user_id } = ctx.query
-    let value = [blog_id, blog_title, blog_content, user_id, createdate]
+    let { blog_title, blog_content, user_id, photos } = ctx.query
+    let value = [blog_id, blog_title, blog_content, user_id, photos, createdate]
     await userModel.addBlog(value).then(res => {
+        console.log(res)
         ctx.body = {
             code: 200,
             message: '提交成功'
         }
-    }).catch(() => {
+    }).catch((err) => {
+        console.log(err)
         ctx.body = {
             code: 500,
             message: '提交异常，请重试'
@@ -43,6 +45,10 @@ exports.selectAllBlog = async ctx => {
         return
     })
     await userModel.selectAllBlog(page).then(res => {
+        res.forEach(ele => {
+            ele.photos = JSON.parse(JSON.parse(JSON.stringify(JSON.parse(JSON.stringify(ele)).photos)))
+            console.log(ele)
+        })
         ctx.body = {
             code: 200,
             message: '查询成功',
@@ -51,7 +57,8 @@ exports.selectAllBlog = async ctx => {
                 total: total
             }
         }
-    }).catch(() => {
+    }).catch((err) => {
+        console.log(err)
         ctx.body = {
             code: 500,
             message: '查询异常，请重试'
