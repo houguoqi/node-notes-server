@@ -1,14 +1,15 @@
 const userModel = require('../lib/mysql.js');
 const moment = require('moment');
 const check = require('../middlewares/checkToken.js')
+const qiniu = require('qiniu');
 
 // 新增博客
 exports.addBlog = async ctx => {
     await check.checkToken(ctx)
     let blog_id = null
     let createdate = moment().format('YYYY-MM-DD HH:mm:ss')
-    let { blog_title, blog_content, user_id, photos } = ctx.query
-    let value = [blog_id, blog_title, blog_content, user_id, photos, createdate]
+    let { blog_title, blog_content, user_id, photos, video } = ctx.query
+    let value = [blog_id, blog_title, blog_content, user_id, photos, createdate, video]
     await userModel.addBlog(value).then(res => {
         console.log(res)
         ctx.body = {
@@ -135,4 +136,24 @@ exports.selectUserInfoById = async ctx => {
             message: '查询异常，请重试'
         }
     })
+}
+
+// Node SDK 获取七牛token
+exports.getQiniuTokenNodeSDK = async ctx => {
+    const accessKey = 'rqJGdbSEFcvyV-8asJJMim27ZqVBWupM-kux9KZG';
+    const secretKey = 'jsITz065NT0nVkuIwk9qmihogXNdc8sqDDLiL3Rk';
+    const bucket = 'hgqweb';
+    const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
+    const options = {
+        scope: bucket,
+        expires: 7200
+    };
+    const putPolicy = new qiniu.rs.PutPolicy(options);
+    const uploadToken = await putPolicy.uploadToken(mac);
+    ctx.body = {
+        code: 200,
+        error: 0,
+        message: '返回token成功',
+        data: uploadToken
+    }
 }
