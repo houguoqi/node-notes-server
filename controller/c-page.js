@@ -46,10 +46,13 @@ exports.selectAllBlog = async ctx => {
         return
     })
     await userModel.selectAllBlog(page).then(res => {
-        res.forEach(ele => {
-            ele.photos = JSON.parse(JSON.parse(JSON.stringify(JSON.parse(JSON.stringify(ele)).photos)))
-            console.log(ele)
-        })
+        console.log(res)
+        if (res.length) {
+            res.forEach(ele => {
+                ele.photos = JSON.parse(JSON.parse(JSON.stringify(JSON.parse(JSON.stringify(ele)).photos)))
+                // console.log(ele)
+            })
+        }
         ctx.body = {
             code: 200,
             message: '查询成功',
@@ -60,6 +63,28 @@ exports.selectAllBlog = async ctx => {
         }
     }).catch((err) => {
         console.log(err)
+        ctx.body = {
+            code: 500,
+            message: '查询异常，请重试'
+        }
+    })
+}
+
+// 模糊搜索博客
+exports.searchBlog = async ctx => {
+    let val = ctx.query.keyword
+    await userModel.searchBlog(val).then(res => {
+        console.log(res)
+        res.forEach(ele => {
+            ele.photos = JSON.parse(JSON.parse(JSON.stringify(JSON.parse(JSON.stringify(ele)).photos)))
+            // console.log(ele)
+        })
+        ctx.body = {
+            code: 200,
+            message: '查询成功',
+            result: res
+        }
+    }).catch(() => {
         ctx.body = {
             code: 500,
             message: '查询异常，请重试'
@@ -130,6 +155,121 @@ exports.selectUserInfoById = async ctx => {
             result: res
         }
     }).catch(err => {
+        console.log(err)
+        ctx.body = {
+            code: 500,
+            message: '查询异常，请重试'
+        }
+    })
+}
+
+// 评论博客
+exports.commentBlog = async ctx => {
+    await check.checkToken(ctx)
+    let comment_id = null
+    let createdate = moment().format('YYYY-MM-DD HH:mm:ss')
+    let { blog_id, user_id, content } = ctx.query
+    if (!blog_id || !user_id || !content) {
+        ctx.body = {
+            code: 500,
+            message: '参数异常，请重试'
+        }
+        return
+    }
+    let value = [comment_id, blog_id, user_id, content, createdate]
+    await userModel.commentBlog(value).then(res => {
+        console.log(res)
+        ctx.body = {
+            code: 200,
+            message: '提交成功'
+        }
+    }).catch((err) => {
+        console.log(err)
+        ctx.body = {
+            code: 500,
+            message: '提交异常，请重试'
+        }
+    })
+}
+
+// 查询评论
+exports.getComments = async ctx => {
+    let blog_id = ctx.query.blog_id
+    if (!blog_id) {
+        ctx.body = {
+            code: 500,
+            message: '缺少blog_id，请重试'
+        }
+        return
+    }
+    await userModel.getBlogComments(blog_id).then(res => {
+        console.log(res)
+        ctx.body = {
+            code: 200,
+            message: '查询成功',
+            result: res
+        }
+    }).catch((err) => {
+        console.log(err)
+        ctx.body = {
+            code: 500,
+            message: '查询异常，请重试'
+        }
+    })
+}
+
+// 收藏博客
+exports.saveBlogById = async ctx => {
+    await check.checkToken(ctx)
+    let id = null
+    let { blog_id, user_id } = ctx.query
+    let createdate = moment().format('YYYY-MM-DD HH:mm:ss')
+    if (!blog_id || !user_id) {
+        ctx.body = {
+            code: 500,
+            message: '参数异常，请重试'
+        }
+        return
+    }
+    let isSave = false
+    await userModel.isSaveBlog(blog_id, user_id).then(res => {
+        console.log(res[0], 'issave')
+        if (res.length) {
+            ctx.body = {
+                code: 500,
+                message: '重复收藏'
+            }
+            isSave = true
+        }
+    })
+    if (!isSave) {
+        let value = [id, blog_id, user_id, createdate]
+        await userModel.saveBlogById(value).then(res => {
+            console.log(res)
+            ctx.body = {
+                code: 200,
+                message: '收藏成功'
+            }
+        }).catch((err) => {
+            console.log(err)
+            ctx.body = {
+                code: 500,
+                message: '提交异常，请重试'
+            }
+        })
+    }
+}
+
+// 查询我的收藏
+exports.getMySaves = async ctx => {
+    const user_id = ctx.query.user_id
+    await userModel.selectMySaves(user_id).then(res => {
+        ctx.body = {
+            code: 200,
+            message: '查询成功',
+            result: res
+        }
+    }).catch((err) => {
         console.log(err)
         ctx.body = {
             code: 500,
