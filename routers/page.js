@@ -17,5 +17,7 @@ router.get('/get_comments', controller.getComments)
 router.get('/save_blog', controller.saveBlogById)
 router.get('/get_my_save', controller.getMySaves)
 router.get('/search_blog', controller.searchBlog)
+router.post('/upload_avator', controller.avatorUpload)
+router.get('/get_avator', controller.getAvator)
 
 module.exports = router

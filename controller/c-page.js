@@ -2,6 +2,9 @@ const userModel = require('../lib/mysql.js');
 const moment = require('moment');
 const check = require('../middlewares/checkToken.js')
 const qiniu = require('qiniu');
+const fs = require('fs');
+const { resolve } = require('path');
+const { rejects } = require('assert');
 
 // 新增博客
 exports.addBlog = async ctx => {
@@ -276,6 +279,78 @@ exports.getMySaves = async ctx => {
             message: '查询异常，请重试'
         }
     })
+}
+
+// 上传头像
+exports.avatorUpload = async ctx => {
+    await check.checkToken(ctx)
+    let { user_id, username, avatorurl, avatorFile } = ctx.request.body
+    // 将头像写入磁盘
+    let base64Data = avatorFile.replace(/^data:image\/\w+;base64,/, ""),
+    dataBuffer = Buffer.from(base64Data, 'base64'),
+    getName = user_id + username,
+    upload = await new Promise((resolve, reject) => {
+        fs.writeFile('./assets/images/' + getName + '.png', dataBuffer, err => {
+            if (err) {
+                throw err;
+                reject(false)
+            };
+            console.log('头像上传成功')
+            resolve(true)
+        });
+    })
+    if (upload) {
+        let value = [user_id, username, avatorurl]
+        if (!user_id || !username || !avatorurl) {
+            ctx.body = {
+                code: 500,
+                message: '参数异常，请重试'
+            }
+            return
+        }
+        await userModel.avatorUpload(value).then(res => {
+            console.log(res)
+            ctx.body = {
+                code: 200,
+                message: '上传成功'
+            }
+        }).catch((err) => {
+            console.log(err)
+            ctx.body = {
+                code: 500,
+                message: '暂时无法更改头像'
+            }
+        })
+    }
+}
+
+// 查询头像 这里存取头像不采用七牛云存储了，采用磁盘读写的方式
+exports.getAvator = async ctx => {
+    await check.checkToken(ctx)
+    let { user_id, username } = ctx.query
+    if (!user_id || !username) {
+        ctx.body = {
+            code: 500,
+            message: '缺少参数，请重试'
+        }
+        return
+    }
+    // 读取磁盘上的头像目录
+    let readFile = await new Promise((resolve, reject) => {
+        fs.readFile('./assets/images/'+ user_id + username + '.png', function (err, data) {
+            if (err) {
+                throw err
+                reject(false)
+            }
+            const imagePrefix = "data:image/bmp;base64,";
+            resolve(imagePrefix + data.toString('base64')) // 转为base64图片格式
+        });
+    })
+    ctx.body = {
+        code: 200,
+        message: '查询成功',
+        avatorFile: readFile
+    }
 }
 
 // Node SDK 获取七牛token
