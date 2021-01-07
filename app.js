@@ -13,6 +13,8 @@ const cors = require('koa2-cors');
 const fs = require('fs');
 const https = require('https');
 const sslify = require('koa-sslify').default
+// 引入定时任务
+const scheduleCase = require('./schedule/schedule_a.js')
 const app = new Koa();
 
 
@@ -75,6 +77,8 @@ app.use(require('./routers/test.js').routes())
 app.use(require('./routers/page.js').routes())
 app.use(require('./routers/login.js').routes())
 
+// 执行定时任务
+scheduleCase.scheduleCronstyle()
 
 app.listen(2324, function () {
     console.log(`listening on port ${config.port} 端口`);
