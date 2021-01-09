@@ -41,7 +41,8 @@ exports.selectAllBlog = async ctx => {
     let total = 0
     await userModel.getTotalAllBlog().then(res => {
         total = res[0].total
-    }).catch(() => {
+    }).catch((err) => {
+        console.log(err)
         ctx.body = {
             code: 500,
             message: '查询异常，请重试'
@@ -328,6 +329,7 @@ exports.avatorUpload = async ctx => {
 exports.getAvator = async ctx => {
     await check.checkToken(ctx)
     let { user_id, username } = ctx.query
+    let hasAvator = false
     if (!user_id || !username) {
         ctx.body = {
             code: 500,
@@ -335,21 +337,40 @@ exports.getAvator = async ctx => {
         }
         return
     }
-    // 读取磁盘上的头像目录
-    let readFile = await new Promise((resolve, reject) => {
-        fs.readFile('./assets/images/'+ user_id + username + '.png', function (err, data) {
-            if (err) {
-                throw err
-                reject(false)
+    await userModel.getAvator(user_id).then(res => {
+        console.log(res)
+        if (!res.length) {
+            ctx.body = {
+                code: 500,
+                message: '未上传头像'
             }
-            const imagePrefix = "data:image/bmp;base64,";
-            resolve(imagePrefix + data.toString('base64')) // 转为base64图片格式
-        });
+        } else {
+            hasAvator = true
+        }
+    }).catch(err => {
+        ctx.body = {
+            code: 500,
+            message: '查询异常'
+        }
     })
-    ctx.body = {
-        code: 200,
-        message: '查询成功',
-        avatorFile: readFile
+    if (hasAvator) {
+         // 读取磁盘上的头像目录
+        let readFile = await new Promise((resolve, reject) => {
+            fs.readFile('./assets/images/'+ user_id + username + '.png', function (err, data) {
+                if (err) {
+                    throw err
+                    reject(false)
+                } else {
+                    const imagePrefix = "data:image/bmp;base64,";
+                    resolve(imagePrefix + data.toString('base64')) // 转为base64图片格式
+                }
+            });
+        })
+        ctx.body = {
+            code: 200,
+            message: '查询成功',
+            avatorFile: readFile
+        }
     }
 }
 
