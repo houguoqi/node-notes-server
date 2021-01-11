@@ -38,7 +38,7 @@ exports.scheduleCronstyle = () => {
         console.log(word, img)
         // 自动存入数据库发表 以管理员admin的身份
         const blog_id = null
-        const blog_title = '定时任务自动爬虫并发送'
+        const blog_title = '每日推送-此消息定时爬虫并发表'
         const blog_content = word
         const user_id = '705C9AD5F777BDD6'
         // const photos = '["' + img + '"]'
