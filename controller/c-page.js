@@ -393,3 +393,39 @@ exports.getQiniuTokenNodeSDK = async ctx => {
         data: uploadToken
     }
 }
+
+// 压缩图片记录
+exports.compressImageRecord = async ctx => {
+  let id = null
+  let {user_id, username, count } = ctx.query
+  let createdate = moment().format('YYYY-MM-DD HH:mm:ss')
+  let value = [id, user_id, username, count, createdate]
+  await userModel.compressImageRecord(value).then(res => {
+      console.log(res)
+      ctx.body = {
+          code: 200,
+          message: '提交成功'
+      }
+  }).catch((err) => {
+      console.log(err)
+      ctx.body = {
+          code: 500,
+          message: '提交异常，请重试'
+      }
+  })
+}
+// 查询压缩记录
+exports.getCompressRecord = async ctx => {
+  await userModel.getCompressRecord().then(res => {
+    ctx.body = {
+      code: 200,
+      message: '查询成功',
+      result: res
+    }
+  }).catch(() => {
+    ctx.body = {
+        code: 500,
+        message: '查询异常，请重试'
+    }
+  })
+}

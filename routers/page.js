@@ -19,5 +19,7 @@ router.get('/get_my_save', controller.getMySaves)
 router.get('/search_blog', controller.searchBlog)
 router.post('/upload_avator', controller.avatorUpload)
 router.get('/get_avator', controller.getAvator)
+router.get('/compress_record', controller.compressImageRecord)
+router.get('/get_compress_record', controller.getCompressRecord)
 
 module.exports = router
