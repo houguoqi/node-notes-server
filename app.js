@@ -78,7 +78,7 @@ app.use(require('./routers/page.js').routes())
 app.use(require('./routers/login.js').routes())
 
 // 执行定时任务
-scheduleCase.scheduleCronstyle()
+// scheduleCase.scheduleCronstyle()
 
 app.listen(2324, function () {
     console.log(`listening on port ${config.port} 端口`);

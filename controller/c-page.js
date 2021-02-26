@@ -429,3 +429,38 @@ exports.getCompressRecord = async ctx => {
     }
   })
 }
+// 添加学习记录
+exports.addLearnRecord = async ctx => {
+  let id = null
+  let {author, title, url } = ctx.query
+  let createdate = moment().format('YYYY-MM-DD HH:mm:ss')
+  let value = [id, author, title, url, createdate]
+  await userModel.addLearnRecord(value).then(res => {
+      console.log(res)
+      ctx.body = {
+          code: 200,
+          message: '提交成功'
+      }
+  }).catch((err) => {
+      console.log(err)
+      ctx.body = {
+          code: 500,
+          message: '提交异常，请重试'
+      }
+  })
+}
+// 查询添加学习记录
+exports.getLearnRecord = async ctx => {
+  await userModel.getLearnRecord().then(res => {
+    ctx.body = {
+      code: 200,
+      message: '查询成功',
+      result: res
+    }
+  }).catch(() => {
+    ctx.body = {
+        code: 500,
+        message: '查询异常，请重试'
+    }
+  })
+}

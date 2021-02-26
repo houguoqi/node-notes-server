@@ -21,5 +21,7 @@ router.post('/upload_avator', controller.avatorUpload)
 router.get('/get_avator', controller.getAvator)
 router.get('/compress_record', controller.compressImageRecord)
 router.get('/get_compress_record', controller.getCompressRecord)
+router.get('/add_learn_record', controller.addLearnRecord)
+router.get('/get_learn_record', controller.getLearnRecord)
 
 module.exports = router
